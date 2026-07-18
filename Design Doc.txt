@@ -1,0 +1,65 @@
+Design Doc
+
+1. Page: I am familiar with what page is in Linux, it is the fundamental unit of memory. It is usually 4096 kb. Here we are defining a custom page for our database, we can allocate more data to each page which will be used to store, read and write memory.
+What information belongs in a page? Just its contents, i.e. the information stored on the page.
+What metadata belongs in memory only? (what does it mean ?)
+What metadata should actually be stored on disk ? Table Name, schemas, indexes 
+Is the page responsible for reading itself ? NO
+Should the page know about the disk ? NO
+
+Responsibility : page-Stores data inside it. Nothing else. Disk Manager- Manages page lifecycle, metadata 
+Public apis : create,write,read,delete (CRUD).
+Data owned : Well the data on the page is owned by the page. Disk manager owns pages,
+current page id +1, if deletion we can just jump after a page
+The on-disk file layout: Not sure what something like
+
+Manager -> Binary files _> metadata {pages}. 
+
+
+2. Disk Manager: Well it should manage reads and writes to a disk. i.e. it will read write to memory ask for pages and take big chunks of memory store where they are at as well as write metadata. How will we know where the data is written ? in case of system crashes or pc shutdown ??
+"What should the caller know?" well caller as in the person trying to do the query should only know if the query succeded or not..
+
+About the problem with de-allocation of pages after page 45 is deleted, i will say we will have a tradeoff between time and memory, if we take 45 page writing pointer will have to move a lot more since pages will be gapped, but if we take 101, we will have a read problem, reading contiguous memory blocks will require more jumps, since writing to page 45 we may run out of space in writing to it so we will assign page 101 and recycle the deleted page
+
+In case of deletion of pages, i think in linux pages are assigned 0 by default so we will go with that.We shall not write on this page as assigning continous memory we can run out of space. we shall just zero it strip its id to be used again with different id ?
+
+Binary file shall contain metadata, not sure but lets go with that. It is better we can decide what it should contain later.
+
+PageID shall be well can our program run on different machines with different requirement ? well we shall assume it only works with simple windows/linux like systems for now so how about uint_64 ?
+
+Error handling -  we can levarage optional in C++ cant we for the particular given case?
+
+Thread safety - we shall give this to the buffer pool it seems it's responsibility not disk managers
+
+Why databases use fixed-size pages instead of variable-sized disk reads. Better Memory management.
+How pread() and pwrite() differ from read() and write() on Linux, and why databases often prefer them. They are atomic, I heard normally disk IO requires 2 steps
+Why operating systems use page caches, and why many databases maintain their own buffer pool on top of the OS cache. to bridge the performance gap between slow storage (like SSDs or HDDs) and fast RAM
+Why page sizes are commonly 4 KB, 8 KB, or 16 KB, and what trade-offs those choices involve. Well larger pages may lead to less pages could have more memory wasted on partial writes.
+What information belongs in a page header versus a file header.(Not sure)
+
+
+//////
+
+1. Design of Page 
+Should Page always be exactly one page in size (e.g., 4096 bytes), or should the page size be configurable? well we can use different sizes however it is not really required as there are some issues with larger pages, data may become unavailable if pages are left empty we can sit at a size in between the normal Linux kernel size 4096 bytes.
+
+2. What C++ type should hold the raw data (std::byte, char, uint8_t, something else)? Why? we might as well store them as bytes? what do you think we could also store it as char but what about checking characters also have to make sure security no sql injections are possible later.
+
+3. Should the page own its memory, or should it sometimes refer to externally allocated memory? Interesting could we link pages as a linkedlist that way we can eliminate page deletion problems what do you think ? It will become implementation heavy 
+
+4. I think pages could store reference to the next page which has not been deleted and nothing else 
+
+
+/////
+What is the absolute minimum metadata a generic page needs in memory? (Think about identity and state, not tables or indexes.) well as you hinted the state of the page is a good idea if the page is dirty then we need to know, we can also store if the page has been modified ? for the prev ques you asked.
+Which component should be responsible for tracking whether a page has been modified ("dirty")? Defend your choice.
+I think the Disk Manager
+If the database supports both 4 KB and 8 KB page sizes (chosen when the database is created), where should that configuration live? In each Page, in the Disk Manager, or somewhere else? Disk Manager, I am assuming Disk Manager does all the management of pages 
+
+
+////
+Who allocates the memory for the page's data? Disk Manager does that 
+Does ReadPage() create and return a new Page? we allocate a page and write to it with Disk Manager 
+Or does the caller provide a buffer to fill? 
+What should happen if WritePage() is called for a page ID that doesn't exist? We shall handle the exception gracefully
+Should AllocatePage() immediately extend the database file, or can it simply reserve an ID until the page is first written? We need to reserve the page id first
