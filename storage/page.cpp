@@ -9,7 +9,7 @@ class Page {
 public:
     Page() = default;
 
-    std::byte* data(){
+    std::byte* getData(){
         return buffer.data();
     }
 
