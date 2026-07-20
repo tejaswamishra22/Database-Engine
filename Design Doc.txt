@@ -63,3 +63,21 @@ Does ReadPage() create and return a new Page? we allocate a page and write to it
 Or does the caller provide a buffer to fill? 
 What should happen if WritePage() is called for a page ID that doesn't exist? We shall handle the exception gracefully
 Should AllocatePage() immediately extend the database file, or can it simply reserve an ID until the page is first written? We need to reserve the page id first
+
+////
+How do we create/open the database file? I want to use POSIX functions only,mmap seems a good choice it maps the address in a way since we have page ids we need to use a mapping and leverage this ?
+How is a page ID mapped to a byte offset? Great question need to finalize the method, hmmm page id deletions are a problem certainly, we can maintain a table or a red black tree custom made or map ?
+How do we allocate new page IDs? since we will store continuous data I would like to clarify some things, we have a list of pages we can delete create and update pages, this calls for a dynamic data structure to maintain pages something like a linked list does it not, like how we use them in LRU cache
+What happens if a read goes past the end of the file? I am not sure about this, we need a end buffer for a page is that a plausible solution to that ? a page indicates the end of a continuous data stream ? like how in tries we store the last node
+How do we make the API testable? Great question I believe there is a google c++ framework for testing I forgot its name I think google test
+
+
+////
+Me : Can you tell me how are planning to write the data with deletion like say if we write first 50 pages and then delete some data from page 20-30 how do we reuse them ?
+Com :
+What persistent information must exist even if the process crashes? If the process crashes we need to know the state of each page, can we have a WAL or an extra page that stores this data ?
+How does it know how many pages exist?
+How does it know which pages are free?
+How does it verify that the file is actually one of your database files?
+How does it know the page size?
+all of this can be stored in the first page of the file system which can be read ?

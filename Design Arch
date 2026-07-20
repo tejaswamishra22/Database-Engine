@@ -1,0 +1,34 @@
+RAII
+move semantics
+smart pointers
+templates
+std::optional
+std::variant
+std::span
+std::expected (or equivalent)
+atomics
+mutex
+shared_mutex
+condition_variable
+thread pools
+cache friendliness
+alignment
+placement new
+memory ordering
+
+
+Page - General utility we just store 4kb pages and nothing else with an api for allocation of data
+
+Disk Manager - writes to a database, does not manage pages just the function being CRUD pages which is to be called from upstream
+Apis ->
+Open() = Create database.db and initialize a page 0 should return a pointer to the opened folder database.db
+close() = Closes the database.db file and flush metadata.
+ReadPage(page_id, Page&) = Returns a stream of bytes or an exception if page not found.
+WritePage(page_id, const Page&) = Write to the page maybe return void.
+AllocatePage() = allocate a page or return exception or create a new page 
+DeallocatePage(page_id) =  deallocate page and return success or failure if successfully deallocated.
+LoadHeader()
+WriteHeader()
+LoadFreePageList()
+PersistFreePageList()
+GetPageCount() =  i dont think we need that, for upstream processes, we can always assign new pages if there is a memory limit reached then we can tell the database separately no need to reveal anything
