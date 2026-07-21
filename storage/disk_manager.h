@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstdint>
 #include <string>
 #include "page.h"
 
@@ -10,6 +11,7 @@ public:
     void Open();
 
 private:
+    static constexpr uint32_t kMagicNumber = 0x4D594442;
     int fd;
     std::string name;
 };

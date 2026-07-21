@@ -1,5 +1,5 @@
 #include "page.h"
 
-std::byte* Page::getData() {
+std::byte* Page::getByte() {
     return buffer.data();
 }

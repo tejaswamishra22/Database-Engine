@@ -10,7 +10,7 @@ class Page {
 public:
     Page() = default;
 
-    std::byte* getData();
+    std::byte* getByte();
 
 private:
     std::array<std::byte, PAGE_SIZE> buffer{};
