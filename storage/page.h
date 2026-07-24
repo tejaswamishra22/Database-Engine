@@ -11,6 +11,7 @@ public:
     Page() = default;
 
     std::byte* getByte();
+    const std::byte* getByte() const;
 
 private:
     std::array<std::byte, PAGE_SIZE> buffer{};

@@ -26,8 +26,24 @@ void DiskManager::Open() {
         Page0Header page0;
         page0.magic = kMagicNumber;
         page0.version = 1;
-        page0.pageSize = 4096;
+        page0.pageSize = PAGE_SIZE;
+        page0.nextPage = 1;
         Page pg0;
         std::memcpy(pg0.getByte(), &page0, sizeof(page0));
+        WritePage(0, pg0);
     }
+}
+ssize_t DiskManager::WritePage(uint32_t pageId,const Page& page) {
+    if (fd < 0) {
+        return -1;
+    }
+    const off_t offset = static_cast<off_t>(pageId * PAGE_SIZE);
+    ssize_t written = pwrite(fd, page.getByte(), PAGE_SIZE, offset);
+    if (written < 0) {
+        throw std::system_error(errno, std::generic_category(), "Writes failed " + name);
+    } 
+    if (fsync(fd) < 0) {
+        throw std::system_error(errno, std::generic_category(), "Failed to write to disk " + name);
+    }
+    return written;
 }
