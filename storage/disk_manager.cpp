@@ -53,7 +53,7 @@ ssize_t DiskManager::ReadPage(uint32_t pageId,Page& page){
    if (fd < 0) {
         throw std::system_error(errno, std::generic_category(), "File Descriptor not open " + name);
     }
-    const off_t offset = static_cast<off_t>(pageId * PAGE_SIZE);
+    const off_t offset = static_cast<off_t>(pageId * PAGE_SIZE); //pageId * PAGE_SIZE is performed before the cast. Can be a problem
     ssize_t ReadData = pread(fd, page.getByte(), PAGE_SIZE, offset);
     if (ReadData < 0) {
         throw std::system_error(errno, std::generic_category(), "Writes failed " + name);

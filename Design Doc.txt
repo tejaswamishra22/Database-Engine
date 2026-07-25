@@ -81,3 +81,15 @@ How does it know which pages are free?
 How does it verify that the file is actually one of your database files?
 How does it know the page size?
 all of this can be stored in the first page of the file system which can be read ?
+
+///
+Close()
+ReadPage() with full-page reads and validation.
+Validation of Page 0's magic number and version during Open().
+Handling of partial reads and writes.
+Unit tests covering:
+Create a new database.
+Reopen an existing database.
+Reject an invalid file.
+Write a page and read it back byte-for-byte.
+Reading a non-existent page should fail.
