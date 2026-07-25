@@ -33,9 +33,10 @@ void DiskManager::Open() {
         WritePage(0, pg0);
     }
 }
+
 ssize_t DiskManager::WritePage(uint32_t pageId,const Page& page) {
     if (fd < 0) {
-        return -1;
+        throw std::system_error(errno, std::generic_category(), "File Descriptor not open " + name);
     }
     const off_t offset = static_cast<off_t>(pageId * PAGE_SIZE);
     ssize_t written = pwrite(fd, page.getByte(), PAGE_SIZE, offset);
@@ -46,4 +47,16 @@ ssize_t DiskManager::WritePage(uint32_t pageId,const Page& page) {
         throw std::system_error(errno, std::generic_category(), "Failed to write to disk " + name);
     }
     return written;
+}
+
+ssize_t DiskManager::ReadPage(uint32_t pageId,Page& page){
+   if (fd < 0) {
+        throw std::system_error(errno, std::generic_category(), "File Descriptor not open " + name);
+    }
+    const off_t offset = static_cast<off_t>(pageId * PAGE_SIZE);
+    ssize_t ReadData = pread(fd, page.getByte(), PAGE_SIZE, offset);
+    if (ReadData < 0) {
+        throw std::system_error(errno, std::generic_category(), "Writes failed " + name);
+    } 
+    return ReadData;
 }

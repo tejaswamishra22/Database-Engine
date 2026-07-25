@@ -17,6 +17,7 @@ public:
 
     void Open();
     ssize_t WritePage(uint32_t,const Page&);
+    ssize_t ReadPage(uint32_t, Page&);
 
 private:
     static constexpr uint32_t kMagicNumber = 0x4D594442;
