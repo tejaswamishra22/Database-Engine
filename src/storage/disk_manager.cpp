@@ -60,3 +60,12 @@ ssize_t DiskManager::ReadPage(uint32_t pageId,Page& page){
     } 
     return ReadData;
 }
+
+void DiskManager::Close(){
+    if(fd<0)return ;
+    if(close(fd)<0){
+        throw std::system_error(errno, std::generic_category(), "Could not close File Descriptor " + fd);
+    }
+    fd=-1;
+    return ;
+}

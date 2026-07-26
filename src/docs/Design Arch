@@ -32,3 +32,13 @@ WriteHeader()
 LoadFreePageList()
 PersistFreePageList()
 GetPageCount() =  i dont think we need that, for upstream processes, we can always assign new pages if there is a memory limit reached then we can tell the database separately no need to reveal anything
+Close()
+ReadPage() with full-page reads and validation.
+Validation of Page 0's magic number and version during Open().
+Handling of partial reads and writes.
+Unit tests covering:
+Create a new database.
+Reopen an existing database.
+Reject an invalid file.
+Write a page and read it back byte-for-byte.
+Reading a non-existent page should fail.
