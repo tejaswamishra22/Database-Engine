@@ -93,3 +93,6 @@ Reopen an existing database.
 Reject an invalid file.
 Write a page and read it back byte-for-byte.
 Reading a non-existent page should fail.
+////
+what if the page is half filled the page we read, in write we can compare from our page and can say half filled values but in read how do we know the size that has been read is full ?
+DiskManager guarantees that every valid page occupies exactly PAGE_SIZE bytes on disk.

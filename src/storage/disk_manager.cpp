@@ -9,9 +9,24 @@
 
 DiskManager::DiskManager(const std::string& dbName) : fd(-1), name(dbName) {}
 
+bool DiskManager::validate(){
+    Page pg0;
+    ssize_t readBytes = ReadPage(0, pg0);
+    
+    if (readBytes < static_cast<ssize_t>(sizeof(Page0Header))) {
+        return false;
+    }
+    
+    Page0Header header{};
+    std::memcpy(&header, pg0.getByte(), sizeof(header));
+    
+    return header.magic == kMagicNumber;
+}
+
 void DiskManager::Open() {
     if (fd < 0) {
         fd = open(name.c_str(), O_RDWR | O_CREAT, 0600);
+        validate();
         if (fd < 0) {
             throw std::system_error(errno, std::generic_category(), "Failed to open " + name);
         }

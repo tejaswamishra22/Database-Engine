@@ -16,9 +16,10 @@ public:
     explicit DiskManager(const std::string& dbName = "database.db");
 
     void Open();
+    void Close();
+    bool validate();
     ssize_t WritePage(uint32_t,const Page&);
     ssize_t ReadPage(uint32_t, Page&);
-    void Close();
 
 private:
     static constexpr uint32_t kMagicNumber = 0x4D594442;
