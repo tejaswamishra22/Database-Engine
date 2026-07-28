@@ -42,3 +42,6 @@ Reopen an existing database.
 Reject an invalid file.
 Write a page and read it back byte-for-byte.
 Reading a non-existent page should fail.
+
+cmake --build build --target storage_tests
+./build/storage_tests --gtest_list_tests

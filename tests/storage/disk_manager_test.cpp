@@ -18,22 +18,17 @@ std::string MakeTempDbPath() {
 
 TEST(DiskManagerTest, InitializesPageZeroHeaderOnFirstOpen) {
     const std::string db_path = MakeTempDbPath();
-
     {
         DiskManager manager(db_path);
         manager.Open();
-
         Page page;
         manager.ReadPage(0, page);
-
         Page0Header header{};
         std::memcpy(&header, page.getByte(), sizeof(header));
-
         EXPECT_EQ(header.magic, 0x4D594442u);
         EXPECT_EQ(header.version, 1u);
         EXPECT_EQ(header.pageSize, PAGE_SIZE);
         EXPECT_EQ(header.nextPage, 1u);
-
         manager.Close();
     }
 
@@ -41,27 +36,15 @@ TEST(DiskManagerTest, InitializesPageZeroHeaderOnFirstOpen) {
     std::filesystem::remove(db_path);
 }
 
-TEST(DiskManagerTest, Failurereadingpagezero) {
+TEST(DiskManagerTest, ValidateDbFile) {
     const std::string db_path = MakeTempDbPath();
-
     {
         DiskManager manager(db_path);
         manager.Open();
-
-        Page page;
-        manager.ReadPage(0, page);
-
-        Page0Header header{};
-        std::memcpy(&header, page.getByte(), sizeof(header));
-
-        EXPECT_EQ(header.magic, 0x4D594442u);
-        EXPECT_EQ(header.version, 1u);
-        EXPECT_EQ(header.pageSize, PAGE_SIZE);
-        EXPECT_EQ(header.nextPage, 1u);
-
+        bool flag=manager.validate();
+        EXPECT_EQ(flag, true);
         manager.Close();
     }
-
     EXPECT_TRUE(std::filesystem::exists(db_path));
     std::filesystem::remove(db_path);
 }

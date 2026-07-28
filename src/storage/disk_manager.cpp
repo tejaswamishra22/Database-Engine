@@ -12,14 +12,11 @@ DiskManager::DiskManager(const std::string& dbName) : fd(-1), name(dbName) {}
 bool DiskManager::validate(){
     Page pg0;
     ssize_t readBytes = ReadPage(0, pg0);
-    
     if (readBytes < static_cast<ssize_t>(sizeof(Page0Header))) {
         return false;
     }
-    
     Page0Header header{};
     std::memcpy(&header, pg0.getByte(), sizeof(header));
-    
     return header.magic == kMagicNumber;
 }
 
