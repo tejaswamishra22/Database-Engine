@@ -7,6 +7,7 @@ struct Page0Header {
     uint32_t version;
     uint32_t pageSize;
     uint32_t nextPage;
+    uint32_t freePages;
 };
 
 class DiskManager {
@@ -16,6 +17,7 @@ public:
     void Open();
     void Close();
     bool validate();
+    bool fileDescClose();
     ssize_t WritePage(uint32_t,const Page&);
     ssize_t ReadPage(uint32_t, Page&);
 

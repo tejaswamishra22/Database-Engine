@@ -95,4 +95,10 @@ Write a page and read it back byte-for-byte.
 Reading a non-existent page should fail.
 ////
 what if the page is half filled the page we read, in write we can compare from our page and can say half filled values but in read how do we know the size that has been read is full ?
-DiskManager guarantees that every valid page occupies exactly PAGE_SIZE bytes on disk.
+Answer :: DiskManager guarantees that every valid page occupies exactly PAGE_SIZE bytes on disk.
+
+///
+Now comes the big question what happens what happens if we try to read/write pages that are not there, we can use page0 for this right ? how many pages can we store till now considering 
+we add uint_32t page numbers that are free we can store 1024 deleted pages from the middle, application never crashes we can make sure to maintain it as a first in first out ? 
+how will we store how many pages have been deleted till now ? What i am assuming is we are writing in a page and will write 32 bit integers we need a index till where the page 0 is filled,
+ and in case deletion does happen we will need to increment a counter of sorts to know that memory x, x+32 is deleted page

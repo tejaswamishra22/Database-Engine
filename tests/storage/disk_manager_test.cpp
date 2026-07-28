@@ -29,6 +29,7 @@ TEST(DiskManagerTest, InitializesPageZeroHeaderOnFirstOpen) {
         EXPECT_EQ(header.version, 1u);
         EXPECT_EQ(header.pageSize, PAGE_SIZE);
         EXPECT_EQ(header.nextPage, 1u);
+        EXPECT_EQ(header.freePages,0u);
         manager.Close();
     }
 
