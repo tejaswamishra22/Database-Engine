@@ -42,6 +42,30 @@ Reopen an existing database.
 Reject an invalid file.
 Write a page and read it back byte-for-byte.
 Reading a non-existent page should fail.
+/*
+class DiskManager {
+public:
+    void Open();
+    void Close();
 
+    void ReadPage(PageId id, Page& page);
+    void WritePage(PageId id, const Page& page);
+
+    PageId AllocatePage();
+    void DeallocatePage(PageId id);
+
+private:
+    void LoadHeader();
+    void WriteHeader();
+
+    void LoadFreePageList();
+    void PersistFreePageList();
+
+    Page0Header header_;
+
+    std::vector<PageId> free_pages_;
+};
+*/
+->Test commands
 cmake --build build --target storage_tests
 ./build/storage_tests --gtest_list_tests

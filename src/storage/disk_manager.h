@@ -2,6 +2,8 @@
 #include <string>
 #include "page.h"
 
+using PageId = uint64_t;
+
 struct Page0Header {
     uint32_t magic;
     uint32_t version;
@@ -16,13 +18,15 @@ public:
 
     void Open();
     void Close();
-    bool validate();
-    bool fileDescClose();
     ssize_t WritePage(uint32_t,const Page&);
     ssize_t ReadPage(uint32_t, Page&);
+    PageId AllocatePage();
+    void DeallocatePage(PageId id);    
 
 private:
     static constexpr uint32_t kMagicNumber = 0x4D594442;
     int fd;
+    bool validate();
+    bool fileDescClose();    
     std::string name;
 };
