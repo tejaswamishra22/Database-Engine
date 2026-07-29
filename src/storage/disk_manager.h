@@ -1,5 +1,6 @@
 #include <cstdint>
 #include <string>
+#include <vector>
 #include "page.h"
 
 using PageId = uint64_t;
@@ -18,8 +19,10 @@ public:
 
     void Open();
     void Close();
+
     ssize_t WritePage(uint32_t,const Page&);
     ssize_t ReadPage(uint32_t, Page&);
+
     PageId AllocatePage();
     void DeallocatePage(PageId id);    
 
@@ -27,6 +30,11 @@ private:
     static constexpr uint32_t kMagicNumber = 0x4D594442;
     int fd;
     bool validate();
-    bool fileDescClose();    
+    bool fileDescClose();
+    void LoadHeader();
+    void WriteHeader();
+    void LoadFreePageList();
+    void PersistFreePageList();    
     std::string name;
+    std::vector<PageId> free_pages_;
 };
