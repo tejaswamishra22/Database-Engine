@@ -9,20 +9,6 @@
 
 DiskManager::DiskManager(const std::string& dbName) : fd(-1), name(dbName) {}
 
-bool DiskManager::validate(){
-    Page pg0;
-    ssize_t readBytes = ReadPage(0, pg0);
-    if (readBytes < static_cast<ssize_t>(sizeof(Page0Header))) {
-        return false;
-    }
-    Page0Header header{};
-    std::memcpy(&header, pg0.getByte(), sizeof(header));
-    return header.magic == kMagicNumber;
-}
-
-bool DiskManager::fileDescClose(){
-    return fd < 0;
-}
 
 void DiskManager::Open() {
         if( !fileDescClose() ) return ;
@@ -48,6 +34,15 @@ void DiskManager::Open() {
         Page pg0;
         std::memcpy(pg0.getByte(), &page0, sizeof(page0));
         WritePage(0, pg0);
+}
+
+void DiskManager::Close(){
+    if(fd<0)return ;
+    if(close(fd)<0){
+        throw std::system_error(errno, std::generic_category(), "Could not close File Descriptor " + fd);
+    }
+    fd=-1;
+    return ;
 }
 
 ssize_t DiskManager::WritePage(uint32_t pageId,const Page& page) {
@@ -83,11 +78,17 @@ ssize_t DiskManager::ReadPage(uint32_t pageId,Page& page){
     return ReadData;
 }
 
-void DiskManager::Close(){
-    if(fd<0)return ;
-    if(close(fd)<0){
-        throw std::system_error(errno, std::generic_category(), "Could not close File Descriptor " + fd);
+bool DiskManager::validate(){
+    Page pg0;
+    ssize_t readBytes = ReadPage(0, pg0);
+    if (readBytes < static_cast<ssize_t>(sizeof(Page0Header))) {
+        return false;
     }
-    fd=-1;
-    return ;
+    Page0Header header{};
+    std::memcpy(&header, pg0.getByte(), sizeof(header));
+    return header.magic == kMagicNumber;
+}
+
+bool DiskManager::fileDescClose(){
+    return fd < 0;
 }
