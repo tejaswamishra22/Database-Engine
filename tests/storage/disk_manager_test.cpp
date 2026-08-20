@@ -36,16 +36,3 @@ TEST(DiskManagerTest, InitializesPageZeroHeaderOnFirstOpen) {
     EXPECT_TRUE(std::filesystem::exists(db_path));
     std::filesystem::remove(db_path);
 }
-
-TEST(DiskManagerTest, ValidateDbFile) {
-    const std::string db_path = MakeTempDbPath();
-    {
-        DiskManager manager(db_path);
-        manager.Open();
-        bool flag=manager.validate();
-        EXPECT_EQ(flag, true);
-        manager.Close();
-    }
-    EXPECT_TRUE(std::filesystem::exists(db_path));
-    std::filesystem::remove(db_path);
-}

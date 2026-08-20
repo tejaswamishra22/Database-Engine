@@ -9,7 +9,7 @@ struct Page0Header {
     uint32_t magic;
     uint32_t version;
     uint32_t pageSize;
-    uint32_t nextPage;
+    PageId nextPage;
     uint32_t freePages;
 };
 
@@ -35,6 +35,7 @@ private:
     void WriteHeader();
     void LoadFreePageList();
     void PersistFreePageList();    
-    std::string name;
+    std::string name_;
     std::vector<PageId> free_pages_;
+    Page0Header header_;
 };
