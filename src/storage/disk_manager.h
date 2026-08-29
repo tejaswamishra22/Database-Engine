@@ -3,14 +3,14 @@
 #include <vector>
 #include "page.h"
 
-using PageId = uint64_t;
+using PageId = uint32_t;
 
 struct Page0Header {
     uint32_t magic;
     uint32_t version;
     uint32_t pageSize;
     PageId nextPage;
-    uint32_t freePages;
+    uint32_t freePageCount;
 };
 
 class DiskManager {
@@ -28,14 +28,16 @@ public:
 
 private:
     static constexpr uint32_t kMagicNumber = 0x4D594442;
+    //variables
     int fd;
+    std::string name_;
+    std::vector<PageId> free_pages_;
+    Page0Header header_;
+    //private functions    
     bool validate();
-    bool fileDescClose();
+    bool IsOpen();
     void LoadHeader();
     void WriteHeader();
     void LoadFreePageList();
     void PersistFreePageList();    
-    std::string name_;
-    std::vector<PageId> free_pages_;
-    Page0Header header_;
 };
