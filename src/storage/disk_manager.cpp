@@ -23,6 +23,14 @@ void DiskManager::Open() {
             if(file_Info.st_size > 0){
                 if(!validate())throw std::system_error(errno, std::generic_category(), "Couldn't read page " + name_);;            
                 return ;
+            }
+            else{
+                header_.magic = kMagicNumber;
+                header_.version = 1;
+                header_.pageSize = PAGE_SIZE;
+                header_.nextPage = 1;
+                header_.freePageCount = 0;  
+                WriteHeader();              
             }    
         }
         else if(file_stats < 0){
@@ -96,7 +104,14 @@ void DiskManager::LoadHeader(){
     return ;
 }
 
-void DiskManager::WriteHeader(){}
+void DiskManager::WriteHeader() {
+    if (!IsOpen()) {
+        throw std::system_error(errno, std::generic_category(),"Database not open: " + name_);
+    }
+    Page pg0;
+    std::memcpy(pg0.getByte(), &header_, sizeof(header_));
+    WritePage(0, pg0);
+}
 
 PageId DiskManager::AllocatePage(){
     LoadFreePageList();

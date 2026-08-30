@@ -69,3 +69,7 @@ private:
 ->Test commands
 cmake --build build --target storage_tests
 ./build/storage_tests --gtest_list_tests
+
+Disk Manager APIs and calls network
+
+Open() -> open database
