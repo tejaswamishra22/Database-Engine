@@ -117,6 +117,36 @@ PageId DiskManager::AllocatePage(){
     LoadFreePageList();
 }
 
-void DiskManager::LoadFreePageList(){
+void DiskManager::LoadFreePageList() {
+    LoadHeader();
+    free_pages_.clear();
+    if (header_.freePageCount == 0) {
+        return;
+    }
+    Page pg0;
+    ReadPage(0, pg0);
+    uint32_t count = header_.freePageCount;
+    free_pages_.resize(count);
+    const std::byte* source_ptr = pg0.getByte() + sizeof(Page0Header);
+    std::memcpy(free_pages_.data(), source_ptr, count * sizeof(PageId));
+}
 
+void DiskManager::PersistFreePageList() {
+    if (!IsOpen()) {
+        throw std::system_error(errno, std::generic_category(),
+                                "Database not open: " + name_);
+    }
+
+    header_.freePageCount = static_cast<uint32_t>(free_pages_.size());
+
+    Page pg0;
+    std::memcpy(pg0.getByte(), &header_, sizeof(header_));
+
+    if (header_.freePageCount > 0) {
+        std::byte* free_list_ptr = pg0.getByte() + sizeof(Page0Header);
+        std::memcpy(free_list_ptr,
+                    free_pages_.data(),
+                    header_.freePageCount * sizeof(PageId));
+    }
+    WritePage(0, pg0);
 }
