@@ -136,12 +136,9 @@ void DiskManager::PersistFreePageList() {
         throw std::system_error(errno, std::generic_category(),
                                 "Database not open: " + name_);
     }
-
     header_.freePageCount = static_cast<uint32_t>(free_pages_.size());
-
     Page pg0;
     std::memcpy(pg0.getByte(), &header_, sizeof(header_));
-
     if (header_.freePageCount > 0) {
         std::byte* free_list_ptr = pg0.getByte() + sizeof(Page0Header);
         std::memcpy(free_list_ptr,
@@ -149,4 +146,25 @@ void DiskManager::PersistFreePageList() {
                     header_.freePageCount * sizeof(PageId));
     }
     WritePage(0, pg0);
+}
+
+PageId DiskManager::AllocatePage(){
+    LoadFreePageList();
+    PageId freePageId;    
+    if(!free_pages_.empty()){
+        freePageId = free_pages_.back();
+        free_pages_.pop_back();
+        header_.freePageCount--;
+        WriteHeader();
+        PersistFreePageList();
+        return freePageId;
+    }
+    if (header_.nextPage == UINT32_MAX) {
+        throw std::system_error(errno, std::generic_category(),
+                            "Database has exhausted all page IDs");
+    }        
+    freePageId = header_.nextPage++;
+    PersistFreePageList();
+    WriteHeader();
+    return freePageId; 
 }
