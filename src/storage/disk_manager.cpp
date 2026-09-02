@@ -36,9 +36,6 @@ void DiskManager::Open() {
         else if(file_stats < 0){
             throw std::system_error(errno, std::generic_category(), "Failed to get File Stats " + name_);
         }
-        Page pg0;
-        std::memcpy(pg0.getByte(), &header_, sizeof(header_));
-        WritePage(0, pg0);
 }
 
 void DiskManager::Close(){
@@ -115,6 +112,29 @@ void DiskManager::WriteHeader() {
 
 PageId DiskManager::AllocatePage(){
     LoadFreePageList();
+    if (!free_pages_.empty()) {
+        PageId freePageId = free_pages_.back();
+        free_pages_.pop_back();
+        PersistFreePageList();
+        return freePageId;
+    }
+    if (header_.nextPage == UINT32_MAX) {
+        throw std::system_error(errno, std::generic_category(),
+                                "Database has exhausted all page IDs");
+    }
+    PageId freePageId = header_.nextPage++;
+    PersistFreePageList();
+    return freePageId;
+}
+
+void DiskManager::DeallocatePage(PageId id) {
+    if (id == 0 || id >= header_.nextPage) {
+        throw std::system_error(errno, std::generic_category(),
+                                "Invalid page ID to deallocate: " + std::to_string(id));
+    }
+    LoadFreePageList();
+    free_pages_.push_back(id);
+    PersistFreePageList();
 }
 
 void DiskManager::LoadFreePageList() {
@@ -146,25 +166,4 @@ void DiskManager::PersistFreePageList() {
                     header_.freePageCount * sizeof(PageId));
     }
     WritePage(0, pg0);
-}
-
-PageId DiskManager::AllocatePage(){
-    LoadFreePageList();
-    PageId freePageId;    
-    if(!free_pages_.empty()){
-        freePageId = free_pages_.back();
-        free_pages_.pop_back();
-        header_.freePageCount--;
-        WriteHeader();
-        PersistFreePageList();
-        return freePageId;
-    }
-    if (header_.nextPage == UINT32_MAX) {
-        throw std::system_error(errno, std::generic_category(),
-                            "Database has exhausted all page IDs");
-    }        
-    freePageId = header_.nextPage++;
-    PersistFreePageList();
-    WriteHeader();
-    return freePageId; 
 }
